@@ -138,8 +138,10 @@ run_prerequisite_checks() {
   check_related_tools
 
   if $CHECKS_PASSED; then
+    log_section "阶段 1 — 汇总"
     log_ok "所有必要依赖检查通过 ✓"
   else
+    log_section "阶段 1 — 汇总"
     log_warn "部分依赖缺失或版本不满足要求，请按提示修复后重新运行"
   fi
 }
@@ -248,13 +250,23 @@ run_openclaw_checks() {
 # 模块 3：安全加固函数集（各函数独立，便于菜单调用）
 # ─────────────────────────────────────────────────────────────────────────────
 
-# 通用：备份文件——将备份操作加入命令队列
+# 通用：备份文件——apply 模式下立即执行，dry-run 模式下仅打印预览
+# 注意：备份不入队列，确保在任何改动执行前就已完成
 _backup_file() {
   local target="$1"
   if [[ ! -f "$target" ]]; then return; fi
   local backup="${target}.bak.$(date +%Y%m%d_%H%M%S)"
-  PENDING_DESCS+=("备份文件：${target##*/}  →  ${backup##*/}")
-  PENDING_CMDS+=("cp $(printf '%q' "$target") $(printf '%q' "$backup")")
+
+  if $APPLY; then
+    if cp "$target" "$backup"; then
+      log_ok "已备份：${target##*/}  →  ${backup##*/}"
+    else
+      log_error "备份失败：${target##*/}"
+      return 1
+    fi
+  else
+    log_info "[预览] 将备份：${target##*/}  →  ${backup##*/}"
+  fi
 }
 
 # 通用：将待执行命令加入队列（无论 dry-run 还是 apply 模式均只入队）
@@ -1142,6 +1154,8 @@ run_hardening() {
   optimize_compaction        # compaction 模式与标识符策略
   check_channel_defaults     # channels.defaults 群组策略与心跳显示配置
 
+  # ══ 执行阶段：汇总并应用全部变更 ════════════════════════════════════════════
+  log_part "执行阶段 — 汇总并应用全部变更"
   flush_pending_commands
 }
 
