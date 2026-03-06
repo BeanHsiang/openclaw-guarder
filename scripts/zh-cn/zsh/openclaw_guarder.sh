@@ -1172,7 +1172,7 @@ main() {
 
   print "${BOLD}${CYAN}"
   print "╔══════════════════════════════════════════╗"
-  print "║       OpenClaw Guarder — macOS           ║"
+  print "║         OpenClaw Guarder                 ║"
   print "╚══════════════════════════════════════════╝${RESET}"
   print "  模式：$(if $DRY_RUN; then print 'DRY-RUN（预览）'; elif $APPLY; then print 'APPLY（应用加固）'; else print '检查（只读）'; fi)"
   print "  时间：$(date '+%Y-%m-%d %H:%M:%S')\n"

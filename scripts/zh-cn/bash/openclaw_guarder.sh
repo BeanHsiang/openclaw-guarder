@@ -1177,7 +1177,7 @@ main() {
 
   printf "%b" "${BOLD}${CYAN}"
   printf "╔══════════════════════════════════════════╗\n"
-  printf "║       OpenClaw Guarder — macOS           ║\n"
+  printf "║         OpenClaw Guarder                 ║\n"
   printf "╚══════════════════════════════════════════╝%b\n" "${RESET}"
   printf "  模式：%s\n" "$(if $DRY_RUN; then echo 'DRY-RUN（预览）'; elif $APPLY; then echo 'APPLY（应用加固）'; else echo '检查（只读）'; fi)"
   printf "  时间：%s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')"
