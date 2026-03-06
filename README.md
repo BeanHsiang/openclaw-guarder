@@ -13,7 +13,9 @@ OpenClaw Guarder provides post-install configuration scripts and security recomm
 ## Usage
 
 1. Install OpenClaw following the [official installation guide](https://docs.openclaw.ai/zh-CN/install).
-2. Choose one of the following methods to run the script:
+2. Choose your preferred shell version and execution method:
+
+### Zsh Version (macOS default)
 
 **Option 1: Run directly with curl (quick start)**
 
@@ -21,20 +23,54 @@ No need to clone the repository — download and execute in one step:
 
 ```bash
 # Check environment and installation status only (default, read-only)
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh
 
 # Preview hardening changes without modifying any files
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --dry-run
 
 # Apply all hardening operations
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --apply
 ```
 
 **Option 2: Download locally then execute (recommended — review before running)**
 
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh -o openclaw_guarder.sh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh -o openclaw_guarder.sh
+
+# Grant execute permission
+chmod +x ./openclaw_guarder.sh
+
+# Check environment and installation status only (default, read-only)
+./openclaw_guarder.sh
+
+# Preview hardening changes without modifying any files
+./openclaw_guarder.sh --dry-run
+
+# Apply all hardening operations
+./openclaw_guarder.sh --apply
+```
+
+### Bash Version
+
+**Option 1: Run directly with curl (quick start)**
+
+```bash
+# Check environment and installation status only (default, read-only)
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash
+
+# Preview hardening changes without modifying any files
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --dry-run
+
+# Apply all hardening operations
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --apply
+```
+
+**Option 2: Download locally then execute (recommended — review before running)**
+
+```bash
+# Download the script
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh -o openclaw_guarder.sh
 
 # Grant execute permission
 chmod +x ./openclaw_guarder.sh

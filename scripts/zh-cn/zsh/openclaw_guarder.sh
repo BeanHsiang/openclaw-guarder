@@ -13,6 +13,13 @@
 
 set -euo pipefail
 
+# 本脚本仅支持 zsh（macOS 默认 Shell）。误用 bash 执行时给出明确提示。
+if [ -z "${ZSH_VERSION:-}" ]; then
+  printf '\033[0;31m[ERROR]\033[0m 请使用 zsh 运行本脚本（macOS 默认 Shell）：\n'
+  printf '        zsh %s\n' "$0"
+  exit 1
+fi
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 颜色与输出工具
 # ─────────────────────────────────────────────────────────────────────────────
@@ -706,7 +713,7 @@ harden_apikey_to_env() {
       # 若 .env 不存在，先创建并设置 600 权限，再追加内容
       _apply_or_preview \
         "写入 .env：${var_name}=<secret>  (来自 models.providers.${provider_name}.apiKey)" \
-        bash -c "mkdir -p $(printf '%q' "$env_dir") && \
+        zsh -c "mkdir -p $(printf '%q' "$env_dir") && \
           { [[ -f $(printf '%q' "$env_file") ]] || { touch $(printf '%q' "$env_file") && chmod 600 $(printf '%q' "$env_file"); }; } && \
           printf '%s=%s\n' $(printf '%q' "$var_name") $(printf '%q' "$field_value") \
           >> $(printf '%q' "$env_file")"

@@ -13,7 +13,9 @@ OpenClaw Guarder 提供安装后配置脚本与安全建议，用于加固 OpenC
 ## 使用方法
 
 1. 参照 [OpenClaw 安装文档](https://docs.openclaw.ai/zh-CN/install) 完成安装。
-2. 选择以下任意一种方式运行脚本：
+2. 选择你偏好的 Shell 版本与执行方式：
+
+### Zsh 版本（macOS 默认）
 
 **方式一：使用 curl 直接执行（快速体验）**
 
@@ -21,13 +23,13 @@ OpenClaw Guarder 提供安装后配置脚本与安全建议，用于加固 OpenC
 
 ```bash
 # 仅执行环境与安装状态检查（默认，只读）
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh
 
 # 预览加固变更，不修改任何文件
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --dry-run
 
 # 执行全部加固操作
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh | zsh -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --apply
 ```
 
 **方式二：curl 下载到本地后执行（推荐，可审阅脚本内容）**
@@ -36,7 +38,41 @@ curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/sc
 
 ```bash
 # 下载脚本
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/openclaw_guarder.sh -o openclaw_guarder.sh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh -o openclaw_guarder.sh
+
+# 赋予执行权限
+chmod +x ./openclaw_guarder.sh
+
+# 仅执行环境与安装状态检查（默认，只读）
+./openclaw_guarder.sh
+
+# 预览加固变更，不修改任何文件
+./openclaw_guarder.sh --dry-run
+
+# 执行全部加固操作
+./openclaw_guarder.sh --apply
+```
+
+### Bash 版本
+
+**方式一：使用 curl 直接执行（快速体验）**
+
+```bash
+# 仅执行环境与安装状态检查（默认，只读）
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash
+
+# 预览加固变更，不修改任何文件
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --dry-run
+
+# 执行全部加固操作
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --apply
+```
+
+**方式二：curl 下载到本地后执行（推荐，可审阅脚本内容）**
+
+```bash
+# 下载脚本
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh -o openclaw_guarder.sh
 
 # 赋予执行权限
 chmod +x ./openclaw_guarder.sh

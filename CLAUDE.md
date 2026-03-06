@@ -13,7 +13,7 @@ When looking up configuration options or command usage for OpenClaw Gateway or C
 
 | Convention | Specification |
 |------------|---------------|
-| Target OS | macOS — no need to support Linux or Windows |
-| Script language | Shell / PowerShell |
-| Shell type | Zsh / Bash / PowerShell |
+| Target OS | macOS and Linux; Windows via WSL2 only — no need to support native Windows |
+| Script language | Shell |
+| Shell type | Zsh / Bash |
 | Tool priority | Prefer built-in commands and tools provided by the macOS version where the script runs, implementing features in the way that best matches the current system version |
