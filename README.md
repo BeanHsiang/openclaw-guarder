@@ -4,6 +4,10 @@
 
 OpenClaw Guarder provides post-install configuration scripts and security recommendations to harden an OpenClaw deployment. After installing OpenClaw, the project's scripts inspect configuration files and safe defaults to reduce security risks, prevent accidental token consumption, and fix common misconfigurations.
 
+The repository also ships complete uninstall scripts based on the official OpenClaw uninstall guide, covering service teardown, state directories, global CLI removal, and common macOS leftovers such as Application Support, Caches, Logs, Preferences, and the desktop app bundle.
+
+Script directories are split by language: English scripts live under `scripts/en/`, and Simplified Chinese scripts live under `scripts/zh-cn/`.
+
 ## Key Features
 
 - Automated post-install checks for environment dependencies, OpenClaw installation status, and critical security settings.
@@ -23,20 +27,20 @@ No need to clone the repository — download and execute in one step:
 
 ```bash
 # Check environment and installation status only (default, read-only)
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_guarder.sh | zsh
 
 # Preview hardening changes without modifying any files
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_guarder.sh | zsh -s -- --dry-run
 
 # Apply all hardening operations
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh | zsh -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_guarder.sh | zsh -s -- --apply
 ```
 
 **Option 2: Download locally then execute (recommended — review before running)**
 
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_guarder.sh -o openclaw_guarder.sh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_guarder.sh -o openclaw_guarder.sh
 
 # Grant execute permission
 chmod +x ./openclaw_guarder.sh
@@ -51,26 +55,69 @@ chmod +x ./openclaw_guarder.sh
 ./openclaw_guarder.sh --apply
 ```
 
-### Bash Version
+## Uninstall OpenClaw
+
+The uninstall scripts follow the official guide at https://docs.openclaw.ai/install/uninstall. If `openclaw` is still available, they first try the official non-interactive uninstall flow, then perform an additional cleanup sweep for leftovers.
+
+Cleanup scope includes:
+
+- `~/.openclaw` and any `~/.openclaw-*` profile state directories
+- plugins recorded in `plugins.installs`, removed via `openclaw plugins uninstall <id>`
+- launchd service leftovers under `~/Library/LaunchAgents`
+- global CLI installs from `npm`, `pnpm`, and `bun` when detected
+- case-insensitive `openclaw` / `opennclaw` lines in `~/.zshrc` and `~/.bashrc` (with a backup created first)
+- `/Applications/OpenClaw.app` and `~/Applications/OpenClaw.app`
+- `~/Library/Application Support/OpenClaw` and related bundle-ID paths
+- `~/Library/Caches`, `~/Library/Logs`, `~/Library/Preferences`, `~/Library/Saved Application State`, `~/Library/HTTPStorages`, and `~/Library/WebKit` leftovers related to OpenClaw
+
+### Zsh Uninstaller
+
+```bash
+# Scan only
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_uninstaller.sh | zsh
+
+# Preview the full uninstall plan
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_uninstaller.sh | zsh -s -- --dry-run
+
+# Perform the full uninstall without prompts
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/zsh/openclaw_uninstaller.sh | zsh -s -- --apply --yes
+```
+
+### Bash Uninstaller
+
+The Bash uninstaller targets Linux / WSL environments. It removes the official CLI install, user-level systemd gateway units when present, and common XDG config/cache/data leftovers.
+
+```bash
+# Scan only
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_uninstaller.sh | bash
+
+# Preview the full uninstall plan
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_uninstaller.sh | bash -s -- --dry-run
+
+# Perform the full uninstall without prompts
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_uninstaller.sh | bash -s -- --apply --yes
+```
+
+### Bash Version (Linux / WSL)
 
 **Option 1: Run directly with curl (quick start)**
 
 ```bash
 # Check environment and installation status only (default, read-only)
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_guarder.sh | bash
 
 # Preview hardening changes without modifying any files
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --dry-run
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_guarder.sh | bash -s -- --dry-run
 
 # Apply all hardening operations
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh | bash -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_guarder.sh | bash -s -- --apply
 ```
 
 **Option 2: Download locally then execute (recommended — review before running)**
 
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_guarder.sh -o openclaw_guarder.sh
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/en/bash/openclaw_guarder.sh -o openclaw_guarder.sh
 
 # Grant execute permission
 chmod +x ./openclaw_guarder.sh

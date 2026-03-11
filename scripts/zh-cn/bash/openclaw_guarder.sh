@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OpenClaw Guarder — macOS 安全加固与配置检查脚本（Bash 版本）
+# OpenClaw Guarder — Windows/Linux 安全加固与配置检查脚本（Bash 版本）
 # =============================================================================
 # 用途：检查环境依赖、验证 OpenClaw 安装状态，并提供分块式安全加固函数，
 #       便于后续扩展为交互式菜单设计。
@@ -76,14 +76,24 @@ _check_cmd() {
   fi
 }
 
-# 检查 Homebrew（macOS 首选包管理器）
-check_homebrew() {
-  log_section "检查 Homebrew"
-  if _check_cmd brew --version; then
-    log_info "Homebrew prefix: $(brew --prefix)"
+# 检查常见包管理器
+check_package_manager() {
+  log_section "检查包管理器"
+
+  if command -v apt-get &>/dev/null; then
+    log_ok "检测到 apt-get（Debian / Ubuntu）"
+  elif command -v dnf &>/dev/null; then
+    log_ok "检测到 dnf（Fedora / RHEL 新版本）"
+  elif command -v yum &>/dev/null; then
+    log_ok "检测到 yum（RHEL / CentOS）"
+  elif command -v pacman &>/dev/null; then
+    log_ok "检测到 pacman（Arch Linux）"
+  elif command -v zypper &>/dev/null; then
+    log_ok "检测到 zypper（openSUSE）"
+  elif command -v brew &>/dev/null; then
+    log_ok "检测到 Homebrew / Linuxbrew  →  $(brew --prefix)"
   else
-    log_warn "建议安装 Homebrew：/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-    CHECKS_PASSED=false
+    log_warn "未检测到常见包管理器（apt/dnf/yum/pacman/zypper/brew），请手动确认 Node.js 与 pnpm 安装方式"
   fi
 }
 
@@ -102,7 +112,7 @@ check_node() {
       CHECKS_PASSED=false
     fi
   else
-    log_error "Node.js 未安装。可通过 Homebrew 安装：brew install node"
+    log_error "Node.js 未安装。请通过系统包管理器安装，例如 apt install nodejs npm"
     CHECKS_PASSED=false
   fi
 
@@ -133,7 +143,7 @@ check_related_tools() {
 # 汇总入口：运行全部基础检查
 run_prerequisite_checks() {
   log_section "阶段 1 — 基础依赖检查"
-  check_homebrew
+  check_package_manager
   check_node
   check_related_tools
 
@@ -191,7 +201,7 @@ check_port_exposure() {
   log_info "检查默认端口 18789 网络暴露状态..."
   local exposed=false
 
-  # 优先使用 lsof（macOS 内置），回退到 netstat
+  # 优先使用 lsof，回退到 netstat
   if command -v lsof &>/dev/null; then
     if lsof -nP -iTCP:18789 -sTCP:LISTEN 2>/dev/null | grep -q '\*:18789\|0\.0\.0\.0:18789'; then
       exposed=true
@@ -325,7 +335,7 @@ harden_gateway_auth() {
   if grep -qE '"?mode"?\s*:\s*"none"' "$config_file" 2>/dev/null; then
     _apply_or_preview \
       '将 gateway.auth.mode 由 "none" 改为 "token"（启用 Token 认证）' \
-      /usr/bin/sed -i '' -E 's/("?mode"?[[:space:]]*:[[:space:]]*)"none"/\1"token"/g' "$config_file"
+      sed -i -E 's/("?mode"?[[:space:]]*:[[:space:]]*)"none"/\1"token"/g' "$config_file"
     log_warn "检测到 gateway.auth.mode 为 none，已加入修复队列；修复后请在配置中补充 gateway.auth.token"
   elif grep -qE '"?token"?\s*:|"?password"?\s*:' "$config_file" 2>/dev/null; then
     log_ok "Gateway 认证已配置（token 或 password）"
@@ -409,7 +419,7 @@ harden_gateway_port() {
     # 配置文件中已有显式 port 字段，直接替换 18789
     _apply_or_preview \
       "将 gateway.port 由 ${port_val} 改为 ${new_port}" \
-      /usr/bin/sed -i '' -E \
+      sed -i -E \
         "s/(\"?port\"?[[:space:]]*:[[:space:]]*)${port_val}/\\1${new_port}/g" \
         "$config_file"
   else
@@ -472,7 +482,7 @@ harden_network_bindings() {
     log_warn "gateway.mode 当前为 \"${mode_val}\"，Gateway 以非本地模式运行"
     _apply_or_preview \
       "将 gateway.mode 由 \"${mode_val}\" 改为 \"local\"（限制仅本机访问）" \
-      /usr/bin/sed -i '' -E \
+      sed -i -E \
         "s/(\"?mode\"?[[:space:]]*:[[:space:]]*)\"${mode_val}\"/\\1\"local\"/g" \
         "$config_file"
   fi
@@ -486,7 +496,7 @@ harden_network_bindings() {
         log_warn "gateway.bind=\"lan\" → 绑定 0.0.0.0，Gateway 对局域网/公网完全暴露，高危！"
         _apply_or_preview \
           "将 gateway.bind 由 \"lan\" 改为 \"loopback\"（限制仅本机访问）" \
-          /usr/bin/sed -i '' -E \
+          sed -i -E \
             's/("?bind"?[[:space:]]*:[[:space:]]*)"lan"/\1"loopback"/g' \
             "$config_file"
         ;;
@@ -494,7 +504,7 @@ harden_network_bindings() {
         log_warn "gateway.bind=\"auto\" → 自动探测网络接口，可能绑定对外地址，存在暴露风险"
         _apply_or_preview \
           "将 gateway.bind 由 \"auto\" 改为 \"loopback\"（限制仅本机访问）" \
-          /usr/bin/sed -i '' -E \
+          sed -i -E \
             's/("?bind"?[[:space:]]*:[[:space:]]*)"auto"/\1"loopback"/g' \
             "$config_file"
         ;;
@@ -502,7 +512,7 @@ harden_network_bindings() {
         log_warn "gateway.bind=\"tailnet\" → 仅 Tailscale 虚拟网络可访问，如不使用 Tailscale 建议改为 loopback"
         _apply_or_preview \
           "将 gateway.bind 由 \"tailnet\" 改为 \"loopback\"（限制仅本机访问）" \
-          /usr/bin/sed -i '' -E \
+          sed -i -E \
             's/("?bind"?[[:space:]]*:[[:space:]]*)"tailnet"/\1"loopback"/g' \
             "$config_file"
         ;;
@@ -539,8 +549,8 @@ harden_config_file_perms() {
 
   # ── 配置文件 ──────────────────────────────────────────────────────────────────
   local file_owner file_perm
-  file_owner=$(stat -f '%Su' "$config_file" 2>/dev/null || echo "unknown")
-  file_perm=$(stat -f '%A' "$config_file" 2>/dev/null || echo "000")
+  file_owner=$(stat -c '%U' "$config_file" 2>/dev/null || echo "unknown")
+  file_perm=$(stat -c '%a' "$config_file" 2>/dev/null || echo "000")
 
   if [[ "$file_owner" != "$current_user" ]]; then
     log_warn "openclaw.json 所有者为 ${file_owner}，当前用户为 ${current_user}，请手动确认"
@@ -558,7 +568,7 @@ harden_config_file_perms() {
   # ── 配置目录 ──────────────────────────────────────────────────────────────────
   if [[ -d "$config_dir" ]]; then
     local dir_perm
-    dir_perm=$(stat -f '%A' "$config_dir" 2>/dev/null || echo "000")
+    dir_perm=$(stat -c '%a' "$config_dir" 2>/dev/null || echo "000")
     if [[ "$dir_perm" == "700" ]]; then
       log_ok "${config_dir} 目录权限已为 700"
     else
@@ -584,8 +594,8 @@ harden_env_file_perms() {
   fi
 
   local file_owner file_perm
-  file_owner=$(stat -f '%Su' "$env_file" 2>/dev/null || echo "unknown")
-  file_perm=$(stat -f '%A' "$env_file" 2>/dev/null || echo "000")
+  file_owner=$(stat -c '%U' "$env_file" 2>/dev/null || echo "unknown")
+  file_perm=$(stat -c '%a' "$env_file" 2>/dev/null || echo "000")
 
   if [[ "$file_owner" != "$current_user" ]]; then
     log_warn ".env 所有者为 ${file_owner}，当前用户为 ${current_user}，请手动确认"
@@ -780,7 +790,7 @@ optimize_heartbeat() {
       log_warn "当前频率每天约产生 $(( 1440 / hb_num )) 次 API 调用"
       _apply_or_preview \
         "将 heartbeat.every 由 ${heartbeat_every} 改为 55m" \
-        /usr/bin/sed -i '' "s/\"every\": \"${heartbeat_every}\"/\"every\": \"55m\"/g" "$config_file"
+        sed -i "s/\"every\": \"${heartbeat_every}\"/\"every\": \"55m\"/g" "$config_file"
     else
       log_ok "heartbeat.every：\"${heartbeat_every}\"  ✓"
     fi
@@ -866,7 +876,7 @@ optimize_compaction() {
       if [[ -n "$mode_val" ]]; then
         _apply_or_preview \
           "将 compaction.mode 由 \"default\" 改为 \"safeguard\"（分块摘要，防止长对话信息丢失）" \
-          /usr/bin/sed -i '' -E \
+          sed -i -E \
             's/("?mode"?[[:space:]]*:[[:space:]]*)"default"/\1"safeguard"/g' \
             "$config_file"
       else
@@ -1004,7 +1014,7 @@ harden_credentials_perms() {
   if [[ -d "$cred_dir" ]]; then
     any_file=true
     local dir_perm
-    dir_perm=$(stat -f '%A' "$cred_dir" 2>/dev/null || echo "000")
+    dir_perm=$(stat -c '%a' "$cred_dir" 2>/dev/null || echo "000")
     if [[ "$dir_perm" == "700" ]]; then
       log_ok "credentials/ 目录权限已为 700"
     else
@@ -1021,7 +1031,7 @@ harden_credentials_perms() {
     for f in "$cred_dir"/*.json; do
       [[ -f "$f" ]] || continue
       local fperm
-      fperm=$(stat -f '%A' "$f" 2>/dev/null || echo "000")
+      fperm=$(stat -c '%a' "$f" 2>/dev/null || echo "000")
       if [[ "$fperm" == "600" ]]; then
         log_ok "${f##*/} 权限已为 600"
       else
@@ -1042,7 +1052,7 @@ harden_credentials_perms() {
     [[ -f "$profile" ]] || continue
     any_file=true
     local pperm agent_id
-    pperm=$(stat -f '%A' "$profile" 2>/dev/null || echo "000")
+    pperm=$(stat -c '%a' "$profile" 2>/dev/null || echo "000")
     agent_id=$(echo "$profile" | sed 's|.*/agents/\([^/]*\)/agent/.*|\1|')
     if [[ "$pperm" == "600" ]]; then
       log_ok "agents/${agent_id}/agent/auth-profiles.json 权限已为 600"
@@ -1079,7 +1089,7 @@ harden_logging_redact() {
       log_warn "logging.redactSensitive=\"off\"，工具摘要将明文写入日志（可能暴露 URL、命令输出、凭证片段）"
       _apply_or_preview \
         "将 logging.redactSensitive 由 \"off\" 改为 \"tools\"（恢复自动脱敏）" \
-        /usr/bin/sed -i '' -E \
+        sed -i -E \
           's/("?redactSensitive"?[[:space:]]*:[[:space:]]*")off"/\1tools"/g' \
           "$config_file"
       ;;

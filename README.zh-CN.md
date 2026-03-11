@@ -4,6 +4,10 @@
 
 OpenClaw Guarder 提供安装后配置脚本与安全建议，用于加固 OpenClaw 部署环境。安装 OpenClaw 之后，本项目的脚本会调整配置文件与安全默认值，以降低安全风险、防止 Token 意外消耗，并修正常见误配置。
 
+仓库同时提供基于 OpenClaw 官方卸载文档的完整卸载脚本，除服务与状态目录外，还会清理常见 macOS 残留，例如 Application Support、Caches、Logs、Preferences 与桌面 App 包体。
+
+脚本目录已按语言拆分：英文脚本位于 `scripts/en/`，简体中文脚本位于 `scripts/zh-cn/`。
+
 ## 主要功能
 
 - 安装后自动检查环境依赖、OpenClaw 安装状态与关键安全配置。
@@ -53,7 +57,50 @@ chmod +x ./openclaw_guarder.sh
 ./openclaw_guarder.sh --apply
 ```
 
-### Bash 版本
+## 卸载 OpenClaw
+
+卸载脚本遵循官方文档：https://docs.openclaw.ai/install/uninstall 。当系统里仍有 `openclaw` CLI 时，会先尝试执行官方的非交互式完整卸载，然后继续补做残留清理。
+
+覆盖范围包括：
+
+- `~/.openclaw` 以及所有 `~/.openclaw-*` profile 状态目录
+- 通过 `openclaw plugins uninstall <id>` 卸载 `plugins.installs` 中记录的已安装插件
+- `~/Library/LaunchAgents` 下的 launchd 服务残留
+- 已检测到的 `npm`、`pnpm`、`bun` 全局 `openclaw` CLI
+- `~/.zshrc`、`~/.bashrc` 中包含 `openclaw` / `opennclaw` 的行（大小写不敏感，执行前会先备份）
+- `/Applications/OpenClaw.app` 与 `~/Applications/OpenClaw.app`
+- `~/Library/Application Support/OpenClaw` 及相关 bundle ID 路径
+- `~/Library/Caches`、`~/Library/Logs`、`~/Library/Preferences`、`~/Library/Saved Application State`、`~/Library/HTTPStorages`、`~/Library/WebKit` 中与 OpenClaw 相关的残留文件
+
+### Zsh 卸载脚本
+
+```bash
+# 仅扫描，不做修改
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_uninstaller.sh | zsh
+
+# 预览完整卸载动作
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_uninstaller.sh | zsh -s -- --dry-run
+
+# 无提示执行完整卸载
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/zsh/openclaw_uninstaller.sh | zsh -s -- --apply --yes
+```
+
+### Bash 卸载脚本
+
+Bash 卸载脚本面向 Linux / WSL 环境，会清理全局 CLI、用户级 systemd Gateway 服务单元，以及常见 XDG 配置、缓存、数据残留。
+
+```bash
+# 仅扫描，不做修改
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_uninstaller.sh | bash
+
+# 预览完整卸载动作
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_uninstaller.sh | bash -s -- --dry-run
+
+# 无提示执行完整卸载
+curl -fsSL https://raw.githubusercontent.com/BeanHsiang/openclaw-guarder/main/scripts/zh-cn/bash/openclaw_uninstaller.sh | bash -s -- --apply --yes
+```
+
+### Bash 版本（Linux / WSL）
 
 **方式一：使用 curl 直接执行（快速体验）**
 
